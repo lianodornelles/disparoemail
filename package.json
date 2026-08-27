@@ -1,0 +1,11 @@
+{
+  "name": "espelunca-envio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Backend de disparo de e-mails da Espelunca (Vercel + Resend + Supabase)",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "resend": "^4.0.0"
+  }
+}
