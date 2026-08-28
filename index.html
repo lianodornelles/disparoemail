@@ -6,9 +6,9 @@
 <title>Espelunca · Disparo</title>
 <style>
   :root{
-    --bg:#0b0b0d; --bg2:#141419; --panel:#1a1a21; --line:#2a2a33;
-    --txt:#ecebe6; --muted:#8f8f9c; --acid:#c9ff3d; --acid2:#a6e021;
-    --hot:#ff2d6f; --ok:#37d67a; --err:#ff5252; --radius:14px;
+    --bg:#010417; --bg2:#0a0e26; --panel:#0d1230; --line:#24284c;
+    --txt:#f6eef2; --muted:#8b8fac; --acid:#E9195B; --acid2:#c81550;
+    --hot:#E9195B; --ok:#37d67a; --err:#ff5252; --radius:14px;
     --mono:ui-monospace,Menlo,monospace; --sans:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
   }
   *{box-sizing:border-box}
@@ -16,12 +16,12 @@
   a{color:var(--acid)}
   .wrap{max-width:1200px;margin:0 auto;padding:20px}
   header.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0 18px;border-bottom:1px solid var(--line)}
-  .logo{font-weight:900;letter-spacing:.18em;font-size:20px;text-transform:uppercase;background:var(--acid);color:#0b0b0d;padding:6px 12px;border-radius:8px;transform:rotate(-2deg)}
+  .logo{font-weight:900;letter-spacing:.18em;font-size:20px;text-transform:uppercase;background:var(--acid);color:#fff;padding:6px 12px;border-radius:8px;transform:rotate(-2deg)}
   .brand small{display:block;color:var(--muted);letter-spacing:.25em;text-transform:uppercase;font-size:10px;margin-top:4px}
   .who{font-size:12px;color:var(--muted)}
   nav.tabs{display:flex;gap:6px;margin:18px 0;flex-wrap:wrap}
   nav.tabs button{background:var(--bg2);color:var(--muted);border:1px solid var(--line);padding:10px 16px;border-radius:10px;font-weight:600;cursor:pointer;font-size:14px}
-  nav.tabs button.active{background:var(--acid);color:#0b0b0d;border-color:var(--acid)}
+  nav.tabs button.active{background:var(--acid);color:#fff;border-color:var(--acid)}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
   @media(max-width:900px){.grid{grid-template-columns:1fr}}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
@@ -31,7 +31,7 @@
   input,textarea,select{width:100%;background:var(--bg2);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:11px 12px;font-size:14px;font-family:var(--sans)}
   textarea{resize:vertical;min-height:90px;line-height:1.5}
   input:focus,textarea:focus{outline:none;border-color:var(--acid)}
-  .btn{background:var(--acid);color:#0b0b0d;border:none;border-radius:10px;padding:12px 18px;font-weight:800;cursor:pointer;font-size:14px}
+  .btn{background:var(--acid);color:#fff;border:none;border-radius:10px;padding:12px 18px;font-weight:800;cursor:pointer;font-size:14px}
   .btn:hover{background:var(--acid2)}
   .btn.sec{background:transparent;color:var(--txt);border:1px solid var(--line)}
   .btn.hot{background:var(--hot);color:#fff}
@@ -41,7 +41,7 @@
   .split{display:flex;gap:10px}.split>*{flex:1}
   .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
   .chip{display:inline-flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:12.5px;cursor:pointer;user-select:none}
-  .chip.on{background:var(--acid);color:#0b0b0d;border-color:var(--acid);font-weight:700}
+  .chip.on{background:var(--acid);color:#fff;border-color:var(--acid);font-weight:700}
   .chip .n{opacity:.7;font-family:var(--mono);font-size:11px}
   table{width:100%;border-collapse:collapse;font-size:13px}
   th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line)}
@@ -52,7 +52,7 @@
   .stat{display:flex;gap:16px;flex-wrap:wrap;margin-top:6px}
   .stat .b{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-width:110px}
   .stat .b .k{font-size:22px;font-weight:800} .stat .b .l{font-size:11px;color:var(--muted);text-transform:uppercase}
-  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--acid);color:#0b0b0d;padding:12px 20px;border-radius:10px;font-weight:700;box-shadow:0 10px 40px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:.25s;z-index:50}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--acid);color:#fff;padding:12px 20px;border-radius:10px;font-weight:700;box-shadow:0 10px 40px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:.25s;z-index:50}
   .toast.show{opacity:1}
   .toast.err{background:var(--err);color:#fff}
   .hidden{display:none}
@@ -69,7 +69,7 @@
 
 <!-- ================= LOGIN ================= -->
 <div id="view-login" class="login">
-  <span class="logo">Espelunca</span>
+  <img src="/logo.png" alt="Espelunca" style="width:250px;max-width:74%;height:auto;display:block;margin:0 auto 22px;">
   <div class="card">
     <h1>Entrar</h1>
     <p class="hint">Coloque seu e-mail. Você recebe um link de acesso — clica nele e volta aqui logado. Sem senha.</p>
@@ -166,7 +166,7 @@
 <script>
 /* ================= CONFIG — preencha estes dois ================= */
 const SUPABASE_URL  = "https://szgpcvbkwrlysjgebaog.supabase.co";
-const SUPABASE_ANON  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6Z3BjdmJrd3JseXNqZ2ViYW9nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NjA2NTEsImV4cCI6MjEwMzQzNjY1MX0.mIi6TP6IjNpydXXBW4lkURYtTr8A78C7uPprNL8ZulM"; // chave PÚBLICA (anon/publishable) — pode ficar no código
+const SUPABASE_ANON  = "COLE_SUA_ANON_KEY_AQUI"; // chave PÚBLICA (anon/publishable) — pode ficar no código
 /* =============================================================== */
 
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -187,16 +187,16 @@ let selected=new Set();
 function buildEmailHtml(f){
   const nome=f.nome||"Nome do evento", data=f.data?fmtData(f.data):"data a definir";
   const texto=esc(f.texto||"").replace(/\n/g,"<br>"), link=f.link||"#", hasLink=!!f.link;
-  return `<!doctype html><html><body style="margin:0;background:#0b0b0d;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#0b0b0d;padding:24px 0;"><tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:100%;background:#141419;border:1px solid #2a2a33;border-radius:16px;overflow:hidden;font-family:Arial,sans-serif;">
-<tr><td style="padding:26px 30px 8px;"><span style="display:inline-block;background:#c9ff3d;color:#0b0b0d;font-weight:900;letter-spacing:.18em;text-transform:uppercase;font-size:18px;padding:7px 14px;border-radius:8px;">Espelunca</span></td></tr>
-<tr><td style="padding:14px 30px 0;"><div style="color:#8f8f9c;font-size:11px;letter-spacing:.22em;text-transform:uppercase;">${esc(data)}</div>
-<h1 style="color:#ecebe6;font-size:30px;line-height:1.15;margin:8px 0 0;font-weight:800;">${esc(nome)}</h1></td></tr>
-<tr><td style="padding:18px 30px 6px;color:#c9c9d2;font-size:15px;line-height:1.65;">${texto}</td></tr>
-<tr><td style="padding:22px 30px 8px;"><a href="${esc(link)}" style="display:inline-block;background:#ff2d6f;color:#fff;text-decoration:none;font-weight:800;font-size:15px;padding:14px 28px;border-radius:10px;">Garantir ingresso &rarr;</a>
-${hasLink?`<div style="color:#8f8f9c;font-size:11px;margin-top:10px;">via Shotgun</div>`:``}</td></tr>
-<tr><td style="padding:26px 30px;border-top:1px solid #2a2a33;"><div style="color:#6f6f7c;font-size:11px;line-height:1.6;">Você recebe este e-mail porque entrou em contato com os eventos da Espelunca.<br><a href="#" style="color:#8f8f9c;">Descadastrar</a> &middot; Espelunca &middot; Porto Alegre/BR</div></td></tr>
+  return `<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0;background:#010417;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#010417;padding:24px 0;"><tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:100%;background:#0a0e26;border:1px solid #24284c;border-radius:16px;overflow:hidden;font-family:Arial,sans-serif;">
+<tr><td align="center" style="padding:30px 30px 6px;"><img src="/logo.png" alt="Espelunca" width="240" style="display:block;width:240px;max-width:72%;height:auto;border:0;margin:0 auto;"></td></tr>
+<tr><td align="center" style="padding:10px 30px 0;"><div style="color:#8b8fac;font-size:11px;letter-spacing:.22em;text-transform:uppercase;">${esc(data)}</div>
+<h1 style="color:#f6eef2;font-size:30px;line-height:1.15;margin:8px 0 0;font-weight:800;">${esc(nome)}</h1></td></tr>
+<tr><td style="padding:18px 30px 6px;color:#cbc9da;font-size:15px;line-height:1.65;">${texto}</td></tr>
+<tr><td align="center" style="padding:22px 30px 8px;"><a href="${esc(link)}" style="display:inline-block;background:#E9195B;color:#fff;text-decoration:none;font-weight:800;font-size:15px;padding:14px 30px;border-radius:10px;">Garantir ingresso &rarr;</a>
+${hasLink?`<div style="color:#8b8fac;font-size:11px;margin-top:10px;">via Shotgun</div>`:``}</td></tr>
+<tr><td style="padding:26px 30px;border-top:1px solid #24284c;"><div style="color:#5a5f82;font-size:11px;line-height:1.6;">Você recebe este e-mail porque entrou em contato com os eventos da Espelunca.<br><a href="#" style="color:#8b8fac;">Descadastrar</a> &middot; Espelunca &middot; Porto Alegre/BR</div></td></tr>
 </table></td></tr></table></body></html>`;
 }
 function fields(){return {nome:$("#fNome").value,data:$("#fData").value,texto:$("#fTexto").value,link:$("#fLink").value,assunto:$("#fAssunto").value};}
