@@ -72,10 +72,12 @@
   <img src="/logo.png" alt="Espelunca" style="width:250px;max-width:74%;height:auto;display:block;margin:0 auto 22px;">
   <div class="card">
     <h1>Entrar</h1>
-    <p class="hint">Coloque seu e-mail. Você recebe um link de acesso — clica nele e volta aqui logado. Sem senha.</p>
-    <label>Seu e-mail</label>
+    <p class="hint">Acesse com seu e-mail e senha.</p>
+    <label>E-mail</label>
     <input type="email" id="loginEmail" placeholder="voce@espeluncadf.com.br">
-    <div class="row" style="margin-top:14px"><button class="btn" id="btnLogin">Enviar link de acesso</button></div>
+    <label>Senha</label>
+    <input type="password" id="loginPass" placeholder="sua senha">
+    <div class="row" style="margin-top:14px"><button class="btn" id="btnLogin">Entrar</button></div>
     <p class="hint" id="loginMsg" style="margin-top:12px"></p>
   </div>
 </div>
@@ -214,13 +216,16 @@ async function showApp(session){
   $("#who").textContent = session.user?.email || "";
   await loadAll();
 }
-$("#btnLogin").onclick=async()=>{
-  const email=$("#loginEmail").value.trim(); if(!email){toast("Digite seu e-mail",true);return;}
-  $("#btnLogin").disabled=true;
-  const { error }=await client.auth.signInWithOtp({ email, options:{ emailRedirectTo: window.location.origin } });
+async function doLogin(){
+  const email=$("#loginEmail").value.trim(), pass=$("#loginPass").value;
+  if(!email || !pass){ $("#loginMsg").textContent="Preencha e-mail e senha."; return; }
+  $("#btnLogin").disabled=true; $("#loginMsg").textContent="Entrando…";
+  const { error }=await client.auth.signInWithPassword({ email, password:pass });
   $("#btnLogin").disabled=false;
-  $("#loginMsg").textContent = error ? ("Erro: "+error.message) : "Link enviado! Abra seu e-mail e clique no link de acesso.";
-};
+  $("#loginMsg").textContent = error ? "E-mail ou senha inválidos." : "";
+}
+$("#btnLogin").onclick=doLogin;
+$("#loginPass").addEventListener("keydown",e=>{ if(e.key==="Enter") doLogin(); });
 $("#btnLogout").onclick=async()=>{ await client.auth.signOut(); };
 
 /* ---------- DADOS ---------- */
