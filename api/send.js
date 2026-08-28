@@ -38,7 +38,7 @@ export default async function handler(req, res) {
   // 1. carrega a campanha
   const { data: c, error: e1 } = await db
     .from("campanhas").select("*").eq("id", campanhaId).single();
-  if (e1 || !c) return res.status(404).json({ error: "campanha não encontrada" });
+    if (e1 || !c) return res.status(404).json({ error: "campanha não encontrada", recebido: campanhaId, detalhe: e1?.message || null, code: e1?.code || null, projeto: (process.env.SUPABASE_URL || "sem-url").slice(0, 34) });
 
   // 2. destinatários: únicos, sem descadastrados, dos nichos escolhidos (via função SQL)
   const { data: rows, error: e2 } = await db.rpc("destinatarios_campanha", { p_id: campanhaId });
