@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Espelunca · Disparo</title>
+<style>
+  :root{
+    --bg:#0b0b0d; --bg2:#141419; --panel:#1a1a21; --line:#2a2a33;
+    --txt:#ecebe6; --muted:#8f8f9c; --acid:#c9ff3d; --acid2:#a6e021;
+    --hot:#ff2d6f; --ok:#37d67a; --err:#ff5252; --radius:14px;
+    --mono:ui-monospace,Menlo,monospace; --sans:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans)}
+  a{color:var(--acid)}
+  .wrap{max-width:1200px;margin:0 auto;padding:20px}
+  header.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0 18px;border-bottom:1px solid var(--line)}
+  .logo{font-weight:900;letter-spacing:.18em;font-size:20px;text-transform:uppercase;background:var(--acid);color:#0b0b0d;padding:6px 12px;border-radius:8px;transform:rotate(-2deg)}
+  .brand small{display:block;color:var(--muted);letter-spacing:.25em;text-transform:uppercase;font-size:10px;margin-top:4px}
+  .who{font-size:12px;color:var(--muted)}
+  nav.tabs{display:flex;gap:6px;margin:18px 0;flex-wrap:wrap}
+  nav.tabs button{background:var(--bg2);color:var(--muted);border:1px solid var(--line);padding:10px 16px;border-radius:10px;font-weight:600;cursor:pointer;font-size:14px}
+  nav.tabs button.active{background:var(--acid);color:#0b0b0d;border-color:var(--acid)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+  .card h2{margin:0 0 4px;font-size:15px}
+  .card p.hint{margin:0 0 14px;color:var(--muted);font-size:12.5px;line-height:1.5}
+  label{display:block;font-size:12px;color:var(--muted);margin:12px 0 6px;font-weight:600}
+  input,textarea,select{width:100%;background:var(--bg2);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:11px 12px;font-size:14px;font-family:var(--sans)}
+  textarea{resize:vertical;min-height:90px;line-height:1.5}
+  input:focus,textarea:focus{outline:none;border-color:var(--acid)}
+  .btn{background:var(--acid);color:#0b0b0d;border:none;border-radius:10px;padding:12px 18px;font-weight:800;cursor:pointer;font-size:14px}
+  .btn:hover{background:var(--acid2)}
+  .btn.sec{background:transparent;color:var(--txt);border:1px solid var(--line)}
+  .btn.hot{background:var(--hot);color:#fff}
+  .btn.sm{padding:8px 12px;font-size:12.5px}
+  .btn[disabled]{opacity:.5;cursor:not-allowed}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .split{display:flex;gap:10px}.split>*{flex:1}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .chip{display:inline-flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:12.5px;cursor:pointer;user-select:none}
+  .chip.on{background:var(--acid);color:#0b0b0d;border-color:var(--acid);font-weight:700}
+  .chip .n{opacity:.7;font-family:var(--mono);font-size:11px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+  .muted{color:var(--muted)} .mono{font-family:var(--mono)}
+  .tag{display:inline-block;background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:2px 8px;font-size:11px;font-family:var(--mono)}
+  .preview-frame{width:100%;height:560px;border:1px solid var(--line);border-radius:12px;background:#fff}
+  .stat{display:flex;gap:16px;flex-wrap:wrap;margin-top:6px}
+  .stat .b{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-width:110px}
+  .stat .b .k{font-size:22px;font-weight:800} .stat .b .l{font-size:11px;color:var(--muted);text-transform:uppercase}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--acid);color:#0b0b0d;padding:12px 20px;border-radius:10px;font-weight:700;box-shadow:0 10px 40px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:.25s;z-index:50}
+  .toast.show{opacity:1}
+  .toast.err{background:var(--err);color:#fff}
+  .hidden{display:none}
+  .del{color:var(--err);cursor:pointer;font-size:12px;border:none;background:none}
+  .banner{background:linear-gradient(90deg,rgba(201,255,61,.12),transparent);border:1px solid var(--line);border-left:3px solid var(--acid);border-radius:10px;padding:12px 14px;font-size:12.5px;color:var(--muted);line-height:1.55;margin-bottom:16px}
+  /* login */
+  .login{max-width:420px;margin:12vh auto;text-align:center}
+  .login .logo{display:inline-block;margin-bottom:22px}
+  .login .card{text-align:left}
+  .login h1{font-size:20px;margin:0 0 6px}
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<div id="view-login" class="login">
+  <span class="logo">Espelunca</span>
+  <div class="card">
+    <h1>Entrar</h1>
+    <p class="hint">Coloque seu e-mail. Você recebe um link de acesso — clica nele e volta aqui logado. Sem senha.</p>
+    <label>Seu e-mail</label>
+    <input type="email" id="loginEmail" placeholder="voce@espeluncadf.com.br">
+    <div class="row" style="margin-top:14px"><button class="btn" id="btnLogin">Enviar link de acesso</button></div>
+    <p class="hint" id="loginMsg" style="margin-top:12px"></p>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="view-app" class="wrap hidden">
+  <header class="top">
+    <div class="brand"><div><span class="logo">Espelunca</span><small>disparo de e-mails</small></div></div>
+    <div class="row"><span class="who" id="who"></span><button class="btn sec sm" id="btnLogout">Sair</button></div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button data-tab="disparo" class="active">Disparo</button>
+    <button data-tab="listas">Listas / Nichos</button>
+    <button data-tab="historico">Histórico</button>
+  </nav>
+
+  <!-- DISPARO -->
+  <section id="tab-disparo">
+    <div class="banner"><b>Disparo real.</b> O que você mandar aqui vai de verdade pros contatos dos nichos escolhidos. Confira o preview antes.</div>
+    <div class="grid">
+      <div class="card">
+        <h2>Montar o e-mail</h2>
+        <p class="hint">Escolha o público, preencha o evento e veja o preview ao lado.</p>
+        <label>Público / Nicho</label>
+        <div class="row"><label class="chip" style="margin:0"><input type="checkbox" id="allNichos" style="width:auto"> <b>Todos os nichos</b></label></div>
+        <div class="chips" id="nichoChips"></div>
+        <label>Nome do evento</label>
+        <input type="text" id="fNome" placeholder="Ex.: Espelunca convida — Baile de Sexta">
+        <div class="split">
+          <div><label>Data do evento</label><input type="date" id="fData"></div>
+          <div><label>Assunto do e-mail</label><input type="text" id="fAssunto" placeholder="Sexta tem Espelunca 🔊"></div>
+        </div>
+        <label>Texto curto</label>
+        <textarea id="fTexto" placeholder="Uma chamada rápida no tom da casa."></textarea>
+        <label>Link do Shotgun (ingressos)</label>
+        <input type="url" id="fLink" placeholder="https://shotgun.live/pt/events/...">
+        <div class="row" style="margin-top:18px">
+          <button class="btn hot" id="btnEnviar">Disparar</button>
+          <span class="muted" id="sendMsg" style="font-size:12.5px"></span>
+        </div>
+        <div class="stat" id="disparoStat" style="margin-top:16px"></div>
+      </div>
+      <div class="card">
+        <h2>Preview do e-mail</h2>
+        <p class="hint">Atualiza sozinho enquanto você digita.</p>
+        <iframe id="preview" class="preview-frame" title="preview"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- LISTAS -->
+  <section id="tab-listas" class="hidden">
+    <div class="grid">
+      <div class="card">
+        <h2>Adicionar / atualizar nicho</h2>
+        <p class="hint">Crie um nicho e cole os e-mails ou suba um CSV. Duplicados são removidos automaticamente.</p>
+        <label>Nome do nicho</label>
+        <input type="text" id="lNome" placeholder="Ex.: House / Funk / VIPs">
+        <label>E-mails (cole — vírgula, ponto-e-vírgula ou uma por linha)</label>
+        <textarea id="lEmails" placeholder="joao@email.com&#10;maria@email.com"></textarea>
+        <label>...ou suba um CSV</label>
+        <input type="file" id="lFile" accept=".csv,.txt">
+        <div class="row" style="margin-top:16px"><button class="btn" id="btnSalvarLista">Salvar nicho</button><span class="muted" id="lMsg" style="font-size:12.5px"></span></div>
+      </div>
+      <div class="card">
+        <h2>Nichos cadastrados</h2>
+        <p class="hint">Contatos únicos na base: <b id="totalUnicos">—</b></p>
+        <table><thead><tr><th>Nicho</th><th>Contatos</th><th></th></tr></thead>
+          <tbody id="listasBody"><tr><td colspan="3" class="muted">Carregando…</td></tr></tbody></table>
+      </div>
+    </div>
+  </section>
+
+  <!-- HISTÓRICO -->
+  <section id="tab-historico" class="hidden">
+    <div class="card">
+      <h2>Histórico de disparos</h2>
+      <table><thead><tr><th>Evento</th><th>Data</th><th>Nichos</th><th>Enviados</th><th>Status</th></tr></thead>
+        <tbody id="histBody"><tr><td colspan="5" class="muted">Carregando…</td></tr></tbody></table>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+/* ================= CONFIG — preencha estes dois ================= */
+const SUPABASE_URL  = "https://szgpcvbkwrlysjgebaog.supabase.co";
+const SUPABASE_ANON  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6Z3BjdmJrd3JseXNqZ2ViYW9nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NjA2NTEsImV4cCI6MjEwMzQzNjY1MX0.mIi6TP6IjNpydXXBW4lkURYtTr8A78C7uPprNL8ZulM"; // chave PÚBLICA (anon/publishable) — pode ficar no código
+/* =============================================================== */
+
+const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+const $ = (s)=>document.querySelector(s);
+const $$ = (s)=>Array.from(document.querySelectorAll(s));
+function toast(msg,err){const t=$("#toast");t.textContent=msg;t.className="toast show"+(err?" err":"");setTimeout(()=>t.className="toast",2600);}
+function esc(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));}
+function fmtData(iso){if(!iso)return "—";const d=new Date(iso.length<=10?iso+"T00:00:00":iso);return isNaN(d)?iso:d.toLocaleDateString("pt-BR");}
+const EMAIL_RE=/[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}/gi;
+function parseEmails(raw){return dedupe((String(raw||"").match(EMAIL_RE)||[]).map(e=>e.toLowerCase()));}
+function dedupe(a){return Array.from(new Set(a.map(e=>String(e||"").trim().toLowerCase()).filter(Boolean)));}
+
+let nichos=[];                 // [{id,nome,count}]
+let selected=new Set();
+
+/* ---------- template (preview, igual ao do e-mail) ---------- */
+function buildEmailHtml(f){
+  const nome=f.nome||"Nome do evento", data=f.data?fmtData(f.data):"data a definir";
+  const texto=esc(f.texto||"").replace(/\n/g,"<br>"), link=f.link||"#", hasLink=!!f.link;
+  return `<!doctype html><html><body style="margin:0;background:#0b0b0d;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#0b0b0d;padding:24px 0;"><tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:100%;background:#141419;border:1px solid #2a2a33;border-radius:16px;overflow:hidden;font-family:Arial,sans-serif;">
+<tr><td style="padding:26px 30px 8px;"><span style="display:inline-block;background:#c9ff3d;color:#0b0b0d;font-weight:900;letter-spacing:.18em;text-transform:uppercase;font-size:18px;padding:7px 14px;border-radius:8px;">Espelunca</span></td></tr>
+<tr><td style="padding:14px 30px 0;"><div style="color:#8f8f9c;font-size:11px;letter-spacing:.22em;text-transform:uppercase;">${esc(data)}</div>
+<h1 style="color:#ecebe6;font-size:30px;line-height:1.15;margin:8px 0 0;font-weight:800;">${esc(nome)}</h1></td></tr>
+<tr><td style="padding:18px 30px 6px;color:#c9c9d2;font-size:15px;line-height:1.65;">${texto}</td></tr>
+<tr><td style="padding:22px 30px 8px;"><a href="${esc(link)}" style="display:inline-block;background:#ff2d6f;color:#fff;text-decoration:none;font-weight:800;font-size:15px;padding:14px 28px;border-radius:10px;">Garantir ingresso &rarr;</a>
+${hasLink?`<div style="color:#8f8f9c;font-size:11px;margin-top:10px;">via Shotgun</div>`:``}</td></tr>
+<tr><td style="padding:26px 30px;border-top:1px solid #2a2a33;"><div style="color:#6f6f7c;font-size:11px;line-height:1.6;">Você recebe este e-mail porque entrou em contato com os eventos da Espelunca.<br><a href="#" style="color:#8f8f9c;">Descadastrar</a> &middot; Espelunca &middot; Porto Alegre/BR</div></td></tr>
+</table></td></tr></table></body></html>`;
+}
+function fields(){return {nome:$("#fNome").value,data:$("#fData").value,texto:$("#fTexto").value,link:$("#fLink").value,assunto:$("#fAssunto").value};}
+function refreshPreview(){$("#preview").srcdoc=buildEmailHtml(fields());}
+
+/* ---------- AUTH ---------- */
+async function init(){
+  const { data:{ session } } = await client.auth.getSession();
+  if(session) showApp(session); else showLogin();
+  client.auth.onAuthStateChange((_e,s)=>{ if(s) showApp(s); else showLogin(); });
+}
+function showLogin(){ $("#view-login").classList.remove("hidden"); $("#view-app").classList.add("hidden"); }
+async function showApp(session){
+  $("#view-login").classList.add("hidden"); $("#view-app").classList.remove("hidden");
+  $("#who").textContent = session.user?.email || "";
+  await loadAll();
+}
+$("#btnLogin").onclick=async()=>{
+  const email=$("#loginEmail").value.trim(); if(!email){toast("Digite seu e-mail",true);return;}
+  $("#btnLogin").disabled=true;
+  const { error }=await client.auth.signInWithOtp({ email, options:{ emailRedirectTo: window.location.origin } });
+  $("#btnLogin").disabled=false;
+  $("#loginMsg").textContent = error ? ("Erro: "+error.message) : "Link enviado! Abra seu e-mail e clique no link de acesso.";
+};
+$("#btnLogout").onclick=async()=>{ await client.auth.signOut(); };
+
+/* ---------- DADOS ---------- */
+async function loadAll(){ await loadNichos(); await loadCampanhas(); refreshPreview(); }
+
+async function loadNichos(){
+  const { data, error }=await client.from("nichos").select("id,nome,nicho_contato(count)").order("nome");
+  if(error){toast("Erro ao carregar nichos: "+error.message,true);return;}
+  nichos=(data||[]).map(n=>({id:n.id,nome:n.nome,count:(n.nicho_contato?.[0]?.count)||0}));
+  renderChips(); renderListas();
+  const { count }=await client.from("contatos").select("*",{count:"exact",head:true});
+  $("#totalUnicos").textContent = count ?? "—";
+}
+async function loadCampanhas(){
+  const { data }=await client.from("campanhas").select("*").order("created_at",{ascending:false}).limit(50);
+  const b=$("#histBody");
+  if(!data||!data.length){b.innerHTML='<tr><td colspan="5" class="muted">Nenhum disparo ainda.</td></tr>';return;}
+  b.innerHTML=data.map(c=>`<tr><td><b>${esc(c.nome||"—")}</b><div class="muted" style="font-size:11px">${esc(c.assunto||"")}</div></td>
+    <td>${fmtData(c.data_evento)}</td><td>${(c.nichos&&c.nichos.length)?c.nichos.length+" nicho(s)":'<span class="tag">todos</span>'}</td>
+    <td class="mono">${c.destinatarios||0}</td><td><span class="tag">${esc(c.status||"")}</span></td></tr>`).join("");
+}
+
+/* ---------- CHIPS + LISTAS ---------- */
+function renderChips(){
+  const box=$("#nichoChips"); box.innerHTML="";
+  if(!nichos.length){box.innerHTML='<span class="muted" style="font-size:12.5px">Nenhum nicho ainda — cadastre em “Listas / Nichos”.</span>';}
+  nichos.forEach(n=>{
+    const c=document.createElement("span");
+    c.className="chip"+(selected.has(n.id)?" on":"");
+    c.innerHTML=`${esc(n.nome)} <span class="n">${n.count}</span>`;
+    c.onclick=()=>{ if($("#allNichos").checked)return; selected.has(n.id)?selected.delete(n.id):selected.add(n.id); renderChips(); refreshStat(); };
+    box.appendChild(c);
+  });
+  refreshStat();
+}
+function renderListas(){
+  const b=$("#listasBody");
+  if(!nichos.length){b.innerHTML='<tr><td colspan="3" class="muted">Nenhum nicho ainda.</td></tr>';return;}
+  b.innerHTML=nichos.map(n=>`<tr><td><b>${esc(n.nome)}</b></td><td class="mono">${n.count}</td>
+    <td><button class="del" data-del="${n.id}">remover</button></td></tr>`).join("");
+  $$("[data-del]").forEach(x=>x.onclick=()=>removeNicho(x.dataset.del));
+}
+async function refreshStat(){
+  const all=$("#allNichos").checked;
+  let count=0;
+  if(all){ const r=await client.from("contatos").select("*",{count:"exact",head:true}).eq("unsubscribed",false); count=r.count||0; }
+  else if(selected.size){
+    const { data }=await client.from("nicho_contato").select("contato_id").in("nicho_id",Array.from(selected));
+    count=new Set((data||[]).map(r=>r.contato_id)).size;
+  }
+  const nCount=all?nichos.length:selected.size;
+  $("#disparoStat").innerHTML=`<div class="b"><div class="k">${count}</div><div class="l">destinatários (aprox.)</div></div>
+    <div class="b"><div class="k">${nCount}</div><div class="l">nichos no disparo</div></div>`;
+}
+
+/* ---------- salvar nicho + contatos ---------- */
+async function saveNicho(nome, emails){
+  emails=dedupe(emails);
+  // 1. acha ou cria o nicho
+  let { data:nRow }=await client.from("nichos").select("id").eq("nome",nome).maybeSingle();
+  if(!nRow){ const ins=await client.from("nichos").insert({nome}).select("id").single(); if(ins.error){toast("Erro: "+ins.error.message,true);return;} nRow=ins.data; }
+  if(emails.length){
+    // 2. upsert contatos (dedupe pelo unique do e-mail) e pega os ids
+    const up=await client.from("contatos").upsert(emails.map(email=>({email})),{onConflict:"email"}).select("id");
+    if(up.error){toast("Erro nos contatos: "+up.error.message,true);return;}
+    // 3. liga cada contato ao nicho
+    const links=up.data.map(r=>({nicho_id:nRow.id,contato_id:r.id}));
+    const lk=await client.from("nicho_contato").upsert(links,{onConflict:"nicho_id,contato_id",ignoreDuplicates:true});
+    if(lk.error){toast("Erro ao ligar: "+lk.error.message,true);return;}
+  }
+  await loadNichos();
+  toast((emails.length||0)+" contatos salvos em "+nome);
+}
+async function removeNicho(id){
+  const { error }=await client.from("nichos").delete().eq("id",id);
+  if(error){toast("Erro: "+error.message,true);return;}
+  selected.delete(id); await loadNichos(); toast("Nicho removido");
+}
+
+/* ---------- DISPARO ---------- */
+async function dispatch(){
+  const f=fields();
+  if(!f.nome){toast("Preencha o nome do evento",true);return;}
+  const all=$("#allNichos").checked;
+  if(!all && selected.size===0){toast("Escolha ao menos um nicho",true);return;}
+  $("#btnEnviar").disabled=true; $("#sendMsg").textContent="Enviando…";
+  // 1. cria a campanha
+  const camp={ nome:f.nome, data_evento:f.data||null, assunto:f.assunto||f.nome, texto:f.texto||"", link_shotgun:f.link||"", nichos: all?[]:Array.from(selected) };
+  const ins=await client.from("campanhas").insert(camp).select("id").single();
+  if(ins.error){ $("#btnEnviar").disabled=false; $("#sendMsg").textContent=""; toast("Erro ao criar campanha: "+ins.error.message,true); return; }
+  // 2. chama o motor com o token do usuário logado
+  const { data:{ session } }=await client.auth.getSession();
+  try{
+    const res=await fetch("/api/send",{ method:"POST", headers:{ "Content-Type":"application/json", "Authorization":"Bearer "+session.access_token }, body:JSON.stringify({ campanhaId:ins.data.id }) });
+    const out=await res.json();
+    if(out.ok){ toast("Disparo enviado ✓ "+out.enviados+" e-mails"); $("#sendMsg").textContent="Enviado pra "+out.enviados+" contatos."; }
+    else { toast("Falha: "+(out.error||"erro"),true); $("#sendMsg").textContent="Falha: "+(out.error||"erro"); }
+  }catch(e){ toast("Erro de rede: "+e.message,true); $("#sendMsg").textContent=""; }
+  $("#btnEnviar").disabled=false;
+  await loadCampanhas();
+}
+
+/* ---------- UI wiring ---------- */
+$$("#tabs button").forEach(b=>b.onclick=()=>{
+  $$("#tabs button").forEach(x=>x.classList.remove("active")); b.classList.add("active");
+  $$("section[id^=tab-]").forEach(s=>s.classList.add("hidden")); $("#tab-"+b.dataset.tab).classList.remove("hidden");
+});
+["#fNome","#fData","#fTexto","#fLink","#fAssunto"].forEach(s=>$(s).addEventListener("input",refreshPreview));
+$("#allNichos").addEventListener("change",()=>{ if($("#allNichos").checked)selected.clear(); renderChips(); });
+$("#btnSalvarLista").onclick=()=>{
+  const nome=$("#lNome").value.trim(); if(!nome){toast("Dê um nome ao nicho",true);return;}
+  const emails=parseEmails($("#lEmails").value);
+  if(!emails.length && !$("#lFile").files.length){toast("Cole e-mails ou suba um CSV",true);return;}
+  if(emails.length){ saveNicho(nome,emails); $("#lNome").value=""; $("#lEmails").value=""; }
+};
+$("#lFile").addEventListener("change",e=>{
+  const file=e.target.files[0]; if(!file)return; const rd=new FileReader();
+  rd.onload=ev=>{ const emails=parseEmails(ev.target.result); const nome=$("#lNome").value.trim();
+    if(nome){ saveNicho(nome,emails); $("#lNome").value=""; $("#lEmails").value=""; $("#lFile").value=""; }
+    else { $("#lEmails").value=emails.join("\n"); toast("Dê um nome ao nicho e clique em Salvar"); } };
+  rd.readAsText(file);
+});
+$("#btnEnviar").onclick=dispatch;
+
+init();
+</script>
+</body>
+</html>
