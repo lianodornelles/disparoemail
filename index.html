@@ -147,7 +147,7 @@
       </div>
       <div class="card">
         <h2>Nichos cadastrados</h2>
-        <p class="hint">Contatos únicos na base: <b id="totalUnicos">—</b></p>
+        <p class="hint">Contatos únicos na base: <b id="totalUnicos">—</b> · removidos por bounce: <b id="totalBounce">—</b></p>
         <table><thead><tr><th>Nicho</th><th>Contatos</th><th></th></tr></thead>
           <tbody id="listasBody"><tr><td colspan="3" class="muted">Carregando…</td></tr></tbody></table>
       </div>
@@ -172,6 +172,7 @@
 const SUPABASE_URL  = "https://szgpcvbkwrlysjgebaog.supabase.co";
 const SUPABASE_ANON  = "sb_publishable_I5Yc9DD4LS0lckPTw3YJuA_9JxG6N_p"; // chave PÚBLICA (anon/publishable) — pode ficar no código
 /* =============================================================== */
+
 
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
@@ -243,6 +244,7 @@ async function loadNichos(){
   renderChips(); renderListas();
   const { count }=await client.from("contatos").select("*",{count:"exact",head:true});
   $("#totalUnicos").textContent = count ?? "—";
+  try{ const { count:bc }=await client.from("contatos").select("*",{count:"exact",head:true}).eq("bounced",true); $("#totalBounce").textContent = bc ?? 0; }catch(e){ $("#totalBounce").textContent="0"; }
 }
 async function loadCampanhas(){
   const { data }=await client.from("campanhas").select("*").order("created_at",{ascending:false}).limit(50);
@@ -278,8 +280,13 @@ async function refreshStat(){
   let count=0;
   if(all){ const r=await client.from("contatos").select("*",{count:"exact",head:true}).eq("unsubscribed",false); count=r.count||0; }
   else if(selected.size){
-    const { data }=await client.from("nicho_contato").select("contato_id").in("nicho_id",Array.from(selected));
-    count=new Set((data||[]).map(r=>r.contato_id)).size;
+    const ids=new Set(); const page=1000; let from=0;
+    while(true){
+      const { data }=await client.from("nicho_contato").select("contato_id").in("nicho_id",Array.from(selected)).range(from,from+page-1);
+      (data||[]).forEach(r=>ids.add(r.contato_id));
+      if(!data || data.length<page) break; from+=page;
+    }
+    count=ids.size;
   }
   const nCount=all?nichos.length:selected.size;
   $("#disparoStat").innerHTML=`<div class="b"><div class="k">${count}</div><div class="l">destinatários (aprox.)</div></div>
