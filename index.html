@@ -115,6 +115,8 @@
         <textarea id="fTexto" placeholder="Uma chamada rápida no tom da casa."></textarea>
         <label>Link do Shotgun (ingressos)</label>
         <input type="url" id="fLink" placeholder="https://shotgun.live/pt/events/...">
+        <label>Flyer do evento (imagem — aparece no corpo do e-mail, depois do texto)</label>
+        <input type="file" id="fFlyer" accept="image/*">
         <div class="row" style="margin-top:18px">
           <button class="btn hot" id="btnEnviar">Disparar</button>
           <span class="muted" id="sendMsg" style="font-size:12.5px"></span>
@@ -184,11 +186,13 @@ function dedupe(a){return Array.from(new Set(a.map(e=>String(e||"").trim().toLow
 
 let nichos=[];                 // [{id,nome,count}]
 let selected=new Set();
+let flyerFile=null, flyerDataUrl=null;   // flyer do e-mail
 
 /* ---------- template (preview, igual ao do e-mail) ---------- */
 function buildEmailHtml(f){
   const nome=f.nome||"Nome do evento", data=f.data?fmtData(f.data):"data a definir";
   const texto=esc(f.texto||"").replace(/\n/g,"<br>"), link=f.link||"#", hasLink=!!f.link;
+  const flyer=f.flyer?`<tr><td align="center" style="padding:14px 30px 2px;"><img src="${esc(f.flyer)}" alt="Flyer" style="display:block;width:100%;max-width:540px;height:auto;border-radius:12px;border:1px solid #24284c;margin:0 auto;"></td></tr>`:"";
   return `<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0;background:#010417;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#010417;padding:24px 0;"><tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:100%;background:#0a0e26;border:1px solid #24284c;border-radius:16px;overflow:hidden;font-family:Arial,sans-serif;">
@@ -196,12 +200,13 @@ function buildEmailHtml(f){
 <tr><td align="center" style="padding:10px 30px 0;"><div style="color:#8b8fac;font-size:11px;letter-spacing:.22em;text-transform:uppercase;">${esc(data)}</div>
 <h1 style="color:#f6eef2;font-size:30px;line-height:1.15;margin:8px 0 0;font-weight:800;">${esc(nome)}</h1></td></tr>
 <tr><td style="padding:18px 30px 6px;color:#cbc9da;font-size:15px;line-height:1.65;">${texto}</td></tr>
+${flyer}
 <tr><td align="center" style="padding:22px 30px 8px;"><a href="${esc(link)}" style="display:inline-block;background:#E9195B;color:#fff;text-decoration:none;font-weight:800;font-size:15px;padding:14px 30px;border-radius:10px;">Garantir ingresso &rarr;</a>
 ${hasLink?`<div style="color:#8b8fac;font-size:11px;margin-top:10px;">via Shotgun</div>`:``}</td></tr>
 <tr><td style="padding:26px 30px;border-top:1px solid #24284c;"><div style="color:#5a5f82;font-size:11px;line-height:1.6;">Você recebe este e-mail porque entrou em contato com os eventos da Espelunca.<br><a href="#" style="color:#8b8fac;">Descadastrar</a> &middot; Espelunca &middot; Porto Alegre/BR</div></td></tr>
 </table></td></tr></table></body></html>`;
 }
-function fields(){return {nome:$("#fNome").value,data:$("#fData").value,texto:$("#fTexto").value,link:$("#fLink").value,assunto:$("#fAssunto").value};}
+function fields(){return {nome:$("#fNome").value,data:$("#fData").value,texto:$("#fTexto").value,link:$("#fLink").value,assunto:$("#fAssunto").value,flyer:flyerDataUrl};}
 function refreshPreview(){$("#preview").srcdoc=buildEmailHtml(fields());}
 
 /* ---------- AUTH ---------- */
@@ -311,9 +316,20 @@ async function dispatch(){
   if(!f.nome){toast("Preencha o nome do evento",true);return;}
   const all=$("#allNichos").checked;
   if(!all && selected.size===0){toast("Escolha ao menos um nicho",true);return;}
-  $("#btnEnviar").disabled=true; $("#sendMsg").textContent="Enviando…";
-  // 1. cria a campanha
-  const camp={ nome:f.nome, data_evento:f.data||null, assunto:f.assunto||f.nome, texto:f.texto||"", link_shotgun:f.link||"", nichos: all?[]:Array.from(selected) };
+  $("#btnEnviar").disabled=true;
+  // 1. sobe o flyer (se tiver) pro Storage e pega o link público
+  let flyer_url=null;
+  if(flyerFile){
+    $("#sendMsg").textContent="Subindo flyer…";
+    const ext=((flyerFile.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,""))||"jpg";
+    const path="flyer-"+Date.now()+"."+ext;
+    const up=await client.storage.from("flyers").upload(path, flyerFile, { upsert:true, contentType:flyerFile.type });
+    if(up.error){ $("#btnEnviar").disabled=false; $("#sendMsg").textContent=""; toast("Erro ao subir o flyer: "+up.error.message,true); return; }
+    flyer_url=client.storage.from("flyers").getPublicUrl(path).data.publicUrl;
+  }
+  $("#sendMsg").textContent="Enviando…";
+  // 2. cria a campanha
+  const camp={ nome:f.nome, data_evento:f.data||null, assunto:f.assunto||f.nome, texto:f.texto||"", link_shotgun:f.link||"", flyer_url, nichos: all?[]:Array.from(selected) };
   const ins=await client.from("campanhas").insert(camp).select("id").single();
   if(ins.error){ $("#btnEnviar").disabled=false; $("#sendMsg").textContent=""; toast("Erro ao criar campanha: "+ins.error.message,true); return; }
   // 2. chama o motor com o token do usuário logado
@@ -334,6 +350,12 @@ $$("#tabs button").forEach(b=>b.onclick=()=>{
   $$("section[id^=tab-]").forEach(s=>s.classList.add("hidden")); $("#tab-"+b.dataset.tab).classList.remove("hidden");
 });
 ["#fNome","#fData","#fTexto","#fLink","#fAssunto"].forEach(s=>$(s).addEventListener("input",refreshPreview));
+$("#fFlyer").addEventListener("change",e=>{
+  const file=e.target.files[0];
+  if(!file){ flyerFile=null; flyerDataUrl=null; refreshPreview(); return; }
+  flyerFile=file;
+  const rd=new FileReader(); rd.onload=ev=>{ flyerDataUrl=ev.target.result; refreshPreview(); }; rd.readAsDataURL(file);
+});
 $("#allNichos").addEventListener("change",()=>{ if($("#allNichos").checked)selected.clear(); renderChips(); });
 $("#btnSalvarLista").onclick=()=>{
   const nome=$("#lNome").value.trim(); if(!nome){toast("Dê um nome ao nicho",true);return;}
