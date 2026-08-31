@@ -46,9 +46,18 @@ export default async function handler(req, res) {
     .from("campanhas").select("*").eq("id", campanhaId).single();
   if (e1 || !c) return res.status(404).json({ error: "campanha não encontrada" });
 
-  const { data: rows, error: e2 } = await db.rpc("destinatarios_campanha", { p_id: campanhaId });
-  if (e2) return res.status(500).json({ error: "erro ao buscar destinatários: " + e2.message });
-  if (!rows || rows.length === 0) return res.status(400).json({ error: "nenhum destinatário" });
+  // busca em páginas de 1000 (o Supabase limita 1000 por consulta) -> serve pra qualquer tamanho de lista
+  let rows = [];
+  { const page = 1000; let from = 0;
+    while (true) {
+      const { data, error } = await db.rpc("destinatarios_campanha", { p_id: campanhaId }).range(from, from + page - 1);
+      if (error) return res.status(500).json({ error: "erro ao buscar destinatários: " + error.message });
+      rows = rows.concat(data || []);
+      if (!data || data.length < page) break;
+      from += page;
+    }
+  }
+  if (rows.length === 0) return res.status(400).json({ error: "nenhum destinatário" });
 
   let enviados = 0;
   for (const lote of chunk(rows, 100)) {
